@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin Dashboard</title>
+<title>Admin Panel</title>
 
 <style>
 body {
@@ -17,75 +17,67 @@ h1 {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 30px;
 }
 
-th, td {
-  padding: 8px;
+td, th {
   border: 1px solid #ddd;
+  padding: 8px;
   font-size: 13px;
 }
 
-th {
-  background: #eee;
+input {
+  width: 80px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Admin Dashboard</h1>
+<h1>Admin Panel</h1>
 
-<h2>Catalogues</h2>
-<table id="catTable">
+<table>
 <tr>
-  <th>ID</th>
-  <th>Name</th>
-  <th>Brand</th>
-</tr>
-</table>
-
-<h2>Variants</h2>
-<table id="varTable">
-<tr>
-  <th>ID</th>
-  <th>Catalogue</th>
-  <th>Name</th>
+  <th>Variant</th>
   <th>Price</th>
+  <th>Update</th>
 </tr>
+
+<tbody id="table"></tbody>
 </table>
 
 <script>
-fetch("https://script.google.com/macros/s/AKfycbzgjOBPDB1Y5Rduo_Cn9EJXdsDba0pwS4kp7LRWCe3JmKb11hqCgswwOgMhX5bsFMFq/exec?mode=admin")
+const API = "https://script.google.com/macros/s/AKfycbz-PgHsEI_GpQYjzxqUP47S0SLXC6QAj6ddnQ_8gAU9SznOWJLMzPkNde1U29IfLcZc/exec";
+
+fetch(API + "?mode=admin")
 .then(r => r.json())
 .then(d => {
 
-  let catHTML = "";
-  d.catalogues.forEach(c => {
-    catHTML += `
-      <tr>
-        <td>${c[0]}</td>
-        <td>${c[3]}</td>
-        <td>${c[1]}</td>
-      </tr>`;
-  });
+  let html = "";
 
-  document.getElementById("catTable").innerHTML += catHTML;
-
-  let varHTML = "";
   d.variants.forEach(v => {
-    varHTML += `
-      <tr>
-        <td>${v[0]}</td>
-        <td>${v[1]}</td>
-        <td>${v[2]}</td>
-        <td>${v[11]}</td>
-      </tr>`;
+    html += `
+    <tr>
+      <td>${v[2]}</td>
+      <td><input id="p${v[0]}" value="${v[11]}"></td>
+      <td><button onclick="update('${v[0]}')">Save</button></td>
+    </tr>`;
   });
 
-  document.getElementById("varTable").innerHTML += varHTML;
-
+  document.getElementById("table").innerHTML = html;
 });
+
+function update(id) {
+  const value = document.getElementById("p" + id).value;
+
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      id: id,
+      price: value
+    })
+  })
+  .then(() => alert("Updated successfully"));
+}
 </script>
 
 </body>
