@@ -5,12 +5,30 @@
 <title>Admin Dashboard</title>
 
 <style>
-body { font-family: Arial; padding:20px; }
-h2 { margin-top:20px; }
+body {
+  font-family: Arial;
+  padding: 20px;
+}
 
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-th, td { padding:8px; border:1px solid #ddd; font-size:13px; }
-th { background:#eee; }
+h1 {
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+th, td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+}
+
+th {
+  background: #eee;
+}
 </style>
 </head>
 
@@ -38,7 +56,7 @@ th { background:#eee; }
 </table>
 
 <script>
-fetch("YOUR_SCRIPT_URL?mode=admin")
+fetch("https://script.google.com/macros/s/AKfycbzgjOBPDB1Y5Rduo_Cn9EJXdsDba0pwS4kp7LRWCe3JmKb11hqCgswwOgMhX5bsFMFq/exec?mode=admin")
 .then(r => r.json())
 .then(d => {
 
