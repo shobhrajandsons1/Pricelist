@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard</title>
+
+<style>
+body { font-family: Arial; padding:20px; }
+h2 { margin-top:20px; }
+
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { padding:8px; border:1px solid #ddd; font-size:13px; }
+th { background:#eee; }
+</style>
+</head>
+
+<body>
+
+<h1>Admin Dashboard</h1>
+
+<h2>Catalogues</h2>
+<table id="catTable">
+<tr>
+  <th>ID</th>
+  <th>Name</th>
+  <th>Brand</th>
+</tr>
+</table>
+
+<h2>Variants</h2>
+<table id="varTable">
+<tr>
+  <th>ID</th>
+  <th>Catalogue</th>
+  <th>Name</th>
+  <th>Price</th>
+</tr>
+</table>
+
+<script>
+fetch("YOUR_SCRIPT_URL?mode=admin")
+.then(r => r.json())
+.then(d => {
+
+  let catHTML = "";
+  d.catalogues.forEach(c => {
+    catHTML += `
+      <tr>
+        <td>${c[0]}</td>
+        <td>${c[3]}</td>
+        <td>${c[1]}</td>
+      </tr>`;
+  });
+
+  document.getElementById("catTable").innerHTML += catHTML;
+
+  let varHTML = "";
+  d.variants.forEach(v => {
+    varHTML += `
+      <tr>
+        <td>${v[0]}</td>
+        <td>${v[1]}</td>
+        <td>${v[2]}</td>
+        <td>${v[11]}</td>
+      </tr>`;
+  });
+
+  document.getElementById("varTable").innerHTML += varHTML;
+
+});
+</script>
+
+</body>
+</html>
