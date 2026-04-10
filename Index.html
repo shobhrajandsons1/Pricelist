@@ -5,15 +5,60 @@
 <title>Catalogue</title>
 
 <style>
-body { font-family: Arial; padding: 15px; background:#f8f6f2; }
-.header { text-align:center; }
-.logo { height:60px; }
-h2 { text-align:center; }
+body {
+  font-family: 'Georgia', serif;
+  background: #f8f6f2;
+  padding: 15px;
+  color: #222;
+}
 
-table { width:100%; border-collapse:collapse; margin-top:15px; }
-th, td { padding:10px; border-bottom:1px solid #ddd; }
-th { background:#eee; }
-.price { font-weight:bold; }
+.header {
+  text-align: center;
+}
+
+.logo {
+  height: 60px;
+}
+
+.brand {
+  font-size: 20px;
+  margin-top: 5px;
+}
+
+.catalogue {
+  text-align: center;
+  font-size: 22px;
+  margin: 15px 0;
+}
+
+.search {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background: #f0ede7;
+}
+
+.price {
+  font-weight: bold;
+  color: #000;
+}
 </style>
 </head>
 
@@ -21,35 +66,46 @@ th { background:#eee; }
 
 <div class="header">
   <img id="logo" class="logo">
-  <h3 id="brand"></h3>
+  <div id="brand" class="brand"></div>
 </div>
 
-<h2 id="catalogue"></h2>
+<div id="catalogue" class="catalogue"></div>
+
+<input type="text" id="search" class="search" placeholder="Search variants...">
 
 <table>
+<thead>
 <tr>
   <th>Variant</th>
   <th>GST</th>
   <th>HSN</th>
   <th>RRP</th>
 </tr>
+</thead>
 <tbody id="data"></tbody>
 </table>
 
 <script>
+let allProducts = [];
+
 const params = new URLSearchParams(window.location.search);
 const id = params.get("catalogue_id");
 
-fetch("YOUR_SCRIPT_URL?catalogue_id=" + id)
+fetch("https://script.google.com/macros/s/AKfycbzgjOBPDB1Y5Rduo_Cn9EJXdsDba0pwS4kp7LRWCe3JmKb11hqCgswwOgMhX5bsFMFq/exec?catalogue_id=" + id)
 .then(r => r.json())
 .then(d => {
 
   document.getElementById("logo").src = d.brand.logo;
   document.getElementById("brand").innerText = d.brand.name;
-  document.getElementById("catalogue").innerText = d.catalogue;
+  document.getElementById("catalogue").innerText = d.catalogue.name;
 
+  allProducts = d.products;
+  render(allProducts);
+});
+
+function render(products) {
   let html = "";
-  d.products.forEach(p => {
+  products.forEach(p => {
     html += `
     <tr>
       <td>${p.name}</td>
@@ -58,8 +114,15 @@ fetch("YOUR_SCRIPT_URL?catalogue_id=" + id)
       <td class="price">₹ ${p.price}</td>
     </tr>`;
   });
-
   document.getElementById("data").innerHTML = html;
+}
+
+document.getElementById("search").addEventListener("input", function() {
+  const value = this.value.toLowerCase();
+  const filtered = allProducts.filter(p => 
+    p.name.toLowerCase().includes(value)
+  );
+  render(filtered);
 });
 </script>
 
