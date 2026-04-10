@@ -42,8 +42,6 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
 th, td {
@@ -57,7 +55,6 @@ th {
 
 .price {
   font-weight: bold;
-  color: #000;
 }
 </style>
 </head>
@@ -86,18 +83,29 @@ th {
 </table>
 
 <script>
-let allProducts = [];
+const API = "https://script.google.com/macros/s/AKfycbz-PgHsEI_GpQYjzxqUP47S0SLXC6QAj6ddnQ_8gAU9SznOWJLMzPkNde1U29IfLcZc/exec";
 
 const params = new URLSearchParams(window.location.search);
 const id = params.get("catalogue_id");
 
-fetch("https://script.google.com/macros/s/AKfycbzgjOBPDB1Y5Rduo_Cn9EJXdsDba0pwS4kp7LRWCe3JmKb11hqCgswwOgMhX5bsFMFq/exec?catalogue_id=" + id)
+if (!id) {
+  document.body.innerHTML = "<h3>Invalid catalogue link</h3>";
+}
+
+let allProducts = [];
+
+fetch(API + "?catalogue_id=" + id)
 .then(r => r.json())
 .then(d => {
 
+  if (d.error) {
+    document.body.innerHTML = "<h3>" + d.error + "</h3>";
+    return;
+  }
+
   document.getElementById("logo").src = d.brand.logo;
   document.getElementById("brand").innerText = d.brand.name;
-  document.getElementById("catalogue").innerText = d.catalogue.name;
+  document.getElementById("catalogue").innerText = d.catalogue;
 
   allProducts = d.products;
   render(allProducts);
@@ -119,7 +127,7 @@ function render(products) {
 
 document.getElementById("search").addEventListener("input", function() {
   const value = this.value.toLowerCase();
-  const filtered = allProducts.filter(p => 
+  const filtered = allProducts.filter(p =>
     p.name.toLowerCase().includes(value)
   );
   render(filtered);
