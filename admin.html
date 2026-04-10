@@ -1,65 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin Panel</title>
-
-<style>
-body {
-  font-family: Arial;
-  padding: 20px;
-}
-
-h1 {
-  margin-bottom: 20px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-td, th {
-  border: 1px solid #ddd;
-  padding: 8px;
-  font-size: 13px;
-}
-
-input {
-  width: 80px;
-}
-</style>
+<title>Admin</title>
 </head>
 
 <body>
 
-<h1>Admin Panel</h1>
+<h2>Admin Panel</h2>
 
-<table>
-<tr>
-  <th>Variant</th>
-  <th>Price</th>
-  <th>Update</th>
-</tr>
-
-<tbody id="table"></tbody>
-</table>
+<table border="1" id="table"></table>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbz-PgHsEI_GpQYjzxqUP47S0SLXC6QAj6ddnQ_8gAU9SznOWJLMzPkNde1U29IfLcZc/exec";
+const API = "YOUR_SHEETDB_API";
 
-fetch(API + "?mode=admin")
+fetch(API)
 .then(r => r.json())
-.then(d => {
+.then(data => {
 
-  let html = "";
+  let html = "<tr><th>Name</th><th>Price</th><th>Update</th></tr>";
 
-  d.variants.forEach(v => {
+  data.forEach(p => {
     html += `
     <tr>
-      <td>${v[2]}</td>
-      <td><input id="p${v[0]}" value="${v[11]}"></td>
-      <td><button onclick="update('${v[0]}')">Save</button></td>
+      <td>${p.VariantName}</td>
+      <td><input value="${p.RRP}" id="${p.VariantID}"></td>
+      <td><button onclick="update('${p.VariantID}')">Save</button></td>
     </tr>`;
   });
 
@@ -67,16 +32,14 @@ fetch(API + "?mode=admin")
 });
 
 function update(id) {
-  const value = document.getElementById("p" + id).value;
+  const val = document.getElementById(id).value;
 
-  fetch(API, {
-    method: "POST",
-    body: JSON.stringify({
-      id: id,
-      price: value
-    })
+  fetch(API + "/VariantID/" + id, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: { RRP: val } })
   })
-  .then(() => alert("Updated successfully"));
+  .then(() => alert("Updated"));
 }
 </script>
 
