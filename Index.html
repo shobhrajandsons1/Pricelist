@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalogue</title>
+
+<style>
+body { font-family: Arial; padding: 15px; background:#f8f6f2; }
+.header { text-align:center; }
+.logo { height:60px; }
+h2 { text-align:center; }
+
+table { width:100%; border-collapse:collapse; margin-top:15px; }
+th, td { padding:10px; border-bottom:1px solid #ddd; }
+th { background:#eee; }
+.price { font-weight:bold; }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <img id="logo" class="logo">
+  <h3 id="brand"></h3>
+</div>
+
+<h2 id="catalogue"></h2>
+
+<table>
+<tr>
+  <th>Variant</th>
+  <th>GST</th>
+  <th>HSN</th>
+  <th>RRP</th>
+</tr>
+<tbody id="data"></tbody>
+</table>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const id = params.get("catalogue_id");
+
+fetch("YOUR_SCRIPT_URL?catalogue_id=" + id)
+.then(r => r.json())
+.then(d => {
+
+  document.getElementById("logo").src = d.brand.logo;
+  document.getElementById("brand").innerText = d.brand.name;
+  document.getElementById("catalogue").innerText = d.catalogue;
+
+  let html = "";
+  d.products.forEach(p => {
+    html += `
+    <tr>
+      <td>${p.name}</td>
+      <td>${p.gst}%</td>
+      <td>${p.hsn}</td>
+      <td class="price">₹ ${p.price}</td>
+    </tr>`;
+  });
+
+  document.getElementById("data").innerHTML = html;
+});
+</script>
+
+</body>
+</html>
