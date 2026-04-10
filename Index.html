@@ -9,129 +9,96 @@ body {
   font-family: 'Georgia', serif;
   background: #f8f6f2;
   padding: 15px;
-  color: #222;
 }
 
-.header {
-  text-align: center;
-}
-
-.logo {
-  height: 60px;
-}
-
-.brand {
-  font-size: 20px;
-  margin-top: 5px;
-}
-
-.catalogue {
-  text-align: center;
-  font-size: 22px;
-  margin: 15px 0;
-}
+.header { text-align: center; }
+.logo { height: 60px; }
+.brand { font-size: 20px; }
+.catalogue { text-align:center; font-size:22px; margin:15px 0; }
 
 .search {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
 }
 
 table {
-  width: 100%;
+  width:100%;
   border-collapse: collapse;
-  background: #fff;
+  background:#fff;
 }
 
 th, td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+  padding:10px;
+  border-bottom:1px solid #eee;
 }
 
-th {
-  background: #f0ede7;
-}
+th { background:#f0ede7; }
 
-.price {
-  font-weight: bold;
-}
+.price { font-weight:bold; }
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <img id="logo" class="logo">
-  <div id="brand" class="brand"></div>
+  <div class="brand" id="brand"></div>
 </div>
 
 <div id="catalogue" class="catalogue"></div>
 
-<input type="text" id="search" class="search" placeholder="Search variants...">
+<input type="text" id="search" class="search" placeholder="Search...">
 
 <table>
-<thead>
 <tr>
   <th>Variant</th>
   <th>GST</th>
   <th>HSN</th>
   <th>RRP</th>
 </tr>
-</thead>
 <tbody id="data"></tbody>
 </table>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbz-PgHsEI_GpQYjzxqUP47S0SLXC6QAj6ddnQ_8gAU9SznOWJLMzPkNde1U29IfLcZc/exec";
+const API = "YOUR_SHEETDB_API";
 
 const params = new URLSearchParams(window.location.search);
-const id = params.get("catalogue_id");
+const catalogueId = params.get("catalogue_id");
 
-if (!id) {
-  document.body.innerHTML = "<h3>Invalid catalogue link</h3>";
+if (!catalogueId) {
+  document.body.innerHTML = "Invalid QR";
 }
 
-let allProducts = [];
+// Fetch filtered data
+fetch(API + "/search?CatalogueID=" + catalogueId)
+.then(res => res.json())
+.then(data => {
 
-fetch(API + "?catalogue_id=" + id)
-.then(r => r.json())
-.then(d => {
+  let all = data;
+  render(all);
 
-  if (d.error) {
-    document.body.innerHTML = "<h3>" + d.error + "</h3>";
-    return;
-  }
-
-  document.getElementById("logo").src = d.brand.logo;
-  document.getElementById("brand").innerText = d.brand.name;
-  document.getElementById("catalogue").innerText = d.catalogue;
-
-  allProducts = d.products;
-  render(allProducts);
+  document.getElementById("search").addEventListener("input", function() {
+    const val = this.value.toLowerCase();
+    const filtered = all.filter(x => 
+      x.VariantName.toLowerCase().includes(val)
+    );
+    render(filtered);
+  });
 });
 
-function render(products) {
+function render(data) {
   let html = "";
-  products.forEach(p => {
+  data.forEach(p => {
     html += `
     <tr>
-      <td>${p.name}</td>
-      <td>${p.gst}%</td>
-      <td>${p.hsn}</td>
-      <td class="price">₹ ${p.price}</td>
+      <td>${p.VariantName}</td>
+      <td>${p.GST}%</td>
+      <td>${p.HSN}</td>
+      <td class="price">₹ ${p.RRP}</td>
     </tr>`;
   });
   document.getElementById("data").innerHTML = html;
 }
-
-document.getElementById("search").addEventListener("input", function() {
-  const value = this.value.toLowerCase();
-  const filtered = allProducts.filter(p =>
-    p.name.toLowerCase().includes(value)
-  );
-  render(filtered);
-});
 </script>
 
 </body>
