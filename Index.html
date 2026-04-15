@@ -2,40 +2,71 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Catalogue</title>
+<title>Pricelist</title>
 
 <style>
 body {
-  font-family: Georgia;
-  background:#f5f3ef;
-  margin:0;
+  font-family: Arial;
+  background: #f5f5f5;
+  margin: 0;
 }
 
+/* HEADER */
 .header {
-  text-align:center;
-  padding:20px;
-  background:#fff;
+  display: flex;
+  align-items: center;
+  padding: 15px 30px;
+  background: white;
+  border-bottom: 1px solid #ddd;
 }
 
-.logo { height:60px; }
-
-.container { padding:15px; }
-
-.search {
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
+.logo {
+  height: 40px;
 }
 
-.card {
-  background:#fff;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:8px;
+.title {
+  text-align: center;
+  font-size: 24px;
+  margin: 20px 0;
+  letter-spacing: 2px;
 }
 
-.price { font-weight:bold; }
-.meta { font-size:12px; color:#777; }
+/* TABLE */
+.container {
+  width: 90%;
+  margin: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th {
+  background: #222;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.right {
+  text-align: right;
+}
+
+/* FOOTER */
+.footer {
+  width: 90%;
+  margin: 20px auto;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
 </style>
 </head>
 
@@ -43,16 +74,33 @@ body {
 
 <div class="header">
   <img id="logo" class="logo">
-  <div id="brand"></div>
-  <div id="catalogue"></div>
 </div>
+
+<div class="title" id="catalogue"></div>
 
 <div class="container">
 
-<input id="search" class="search" placeholder="Search...">
+<table>
+<thead>
+<tr>
+  <th>QUALITY</th>
+  <th>HSN CODE</th>
+  <th>GST RATE %</th>
+  <th>RRP (₹)</th>
+  <th>GST AMOUNT (₹)</th>
+  <th>Total (₹)</th>
+</tr>
+</thead>
 
-<div id="data"></div>
+<tbody id="data"></tbody>
 
+</table>
+
+</div>
+
+<div class="footer">
+  <div>© 2025 - Pricelist</div>
+  <div id="date"></div>
 </div>
 
 <script>
@@ -60,47 +108,45 @@ const API = "https://sheetdb.io/api/v1/z4rjokjijd72d";
 
 const id = new URLSearchParams(window.location.search).get("catalogue_id");
 
-if (!id) {
-  document.body.innerHTML = "Invalid catalogue link";
-}
-
-let all = [];
-
 fetch(API + "/search?CatalogueID=" + id)
 .then(r => r.json())
 .then(data => {
 
   if (!data.length) {
-    document.body.innerHTML = "No catalogue found";
+    document.body.innerHTML = "No data found";
     return;
   }
 
-  all = data;
-
-  document.getElementById("brand").innerText = data[0].BrandName;
-  document.getElementById("catalogue").innerText = data[0].CatalogueName;
+  // Header
   document.getElementById("logo").src = data[0].LogoURL;
+  document.getElementById("catalogue").innerText = data[0].CatalogueName;
 
-  render(all);
-});
-
-function render(arr) {
   let html = "";
-  arr.forEach(p => {
-    html += `
-    <div class="card">
-      <div><b>${p.VariantName}</b></div>
-      <div class="meta">HSN ${p.HSN} | GST ${p.GST}%</div>
-      <div class="price">₹ ${p.RRP}</div>
-    </div>`;
-  });
-  document.getElementById("data").innerHTML = html;
-}
 
-document.getElementById("search").oninput = e => {
-  const v = e.target.value.toLowerCase();
-  render(all.filter(x => x.VariantName.toLowerCase().includes(v)));
-};
+  data.forEach(p => {
+
+    const rrp = parseFloat(p.RRP || 0);
+    const gst = parseFloat(p.GST || 0);
+
+    const gstAmount = (rrp * gst / 100).toFixed(2);
+    const total = (rrp + parseFloat(gstAmount)).toFixed(2);
+
+    html += `
+    <tr>
+      <td>${p.VariantName}</td>
+      <td>${p.HSN}</td>
+      <td>${p.GST}</td>
+      <td class="right">${rrp}</td>
+      <td class="right">${gstAmount}</td>
+      <td class="right">${total}</td>
+    </tr>`;
+  });
+
+  document.getElementById("data").innerHTML = html;
+
+  document.getElementById("date").innerText =
+    "With effect from " + new Date().toLocaleDateString();
+});
 </script>
 
 </body>
