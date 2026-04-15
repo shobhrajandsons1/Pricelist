@@ -2,114 +2,124 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin Panel</title>
+<title>Admin Dashboard</title>
 
 <style>
 body {
   margin: 0;
   font-family: Arial;
   display: flex;
+  background: #f5f3ef;
 }
 
 /* SIDEBAR */
 .sidebar {
   width: 250px;
   height: 100vh;
-  background: #111;
-  color: #fff;
-  overflow-y: auto;
+  background: #1e2a44;
+  color: white;
   position: fixed;
 }
 
 .sidebar h2 {
-  text-align: center;
-  padding: 15px;
-  border-bottom: 1px solid #333;
+  padding: 20px;
+  color: #f5a623;
 }
 
-.menu-item {
-  padding: 12px 20px;
+.menu {
+  padding: 10px;
+}
+
+.menu div {
+  padding: 12px 15px;
+  margin: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  border-bottom: 1px solid #222;
 }
 
-.menu-item:hover {
-  background: #222;
+.menu div:hover {
+  background: #2c3b5e;
 }
 
-.submenu {
-  display: none;
-  background: #1a1a1a;
+.active {
+  background: #f5a623;
+  color: black;
 }
 
-.submenu div {
-  padding: 10px 30px;
-  font-size: 14px;
-}
-
-.submenu div:hover {
-  background: #333;
-}
-
-/* MAIN CONTENT */
+/* MAIN */
 .main {
   margin-left: 250px;
   padding: 20px;
   width: 100%;
 }
 
+/* CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #777;
+}
+
+.card p {
+  font-size: 28px;
+  margin: 5px 0 0;
+}
+
 /* TABLE */
 table {
   width: 100%;
+  margin-top: 20px;
   border-collapse: collapse;
+  background: white;
 }
 
-td, th {
-  border: 1px solid #ddd;
-  padding: 8px;
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 input {
   width: 80px;
 }
 </style>
-
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
+  <h2>The Crafted Corners</h2>
 
-  <h2>Admin</h2>
-
-  <div class="menu-item" onclick="toggleMenu('catalogueMenu')">
-    Catalogues ▼
+  <div class="menu">
+    <div class="active" onclick="showDashboard()">Dashboard</div>
+    <div onclick="loadVariants()">Variant Management</div>
   </div>
-  <div id="catalogueMenu" class="submenu">
-    <div onclick="loadVariants()">All Variants</div>
-  </div>
-
-  <div class="menu-item" onclick="toggleMenu('brandMenu')">
-    Brands ▼
-  </div>
-  <div id="brandMenu" class="submenu">
-    <div>View Brands</div>
-  </div>
-
-  <div class="menu-item" onclick="toggleMenu('settingsMenu')">
-    Settings ▼
-  </div>
-  <div id="settingsMenu" class="submenu">
-    <div>General</div>
-  </div>
-
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-  <h2>Dashboard</h2>
+  <h1>Dashboard</h1>
+  <p>Overview of your interior products business</p>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Variants</h3>
+      <p id="variantCount">0</p>
+    </div>
+  </div>
 
   <table id="table"></table>
 
@@ -118,26 +128,27 @@ input {
 <script>
 const API = "https://sheetdb.io/api/v1/z4rjokjijd72d";
 
-// Toggle submenu
-function toggleMenu(id) {
-  const el = document.getElementById(id);
-  el.style.display = el.style.display === "block" ? "none" : "block";
+// DASHBOARD LOAD
+function showDashboard() {
+  fetch(API)
+  .then(r => r.json())
+  .then(data => {
+
+    document.getElementById("variantCount").innerText = data.length;
+
+    document.getElementById("table").innerHTML = "";
+  });
 }
 
-// Load variants
+// LOAD VARIANTS
 function loadVariants() {
   fetch(API)
   .then(r => r.json())
-  .then(d => {
+  .then(data => {
 
-    if (!d.length) {
-      document.getElementById("table").innerHTML = "No data found";
-      return;
-    }
+    let html = "<tr><th>Name</th><th>Price</th><th>Update</th></tr>";
 
-    let html = "<tr><th>Variant</th><th>Price</th><th>Update</th></tr>";
-
-    d.forEach(p => {
+    data.forEach(p => {
       html += `
       <tr>
         <td>${p.VariantName || ""}</td>
@@ -150,7 +161,7 @@ function loadVariants() {
   });
 }
 
-// Update price
+// UPDATE PRICE
 function update(id) {
   const val = document.getElementById(id).value;
 
@@ -161,6 +172,9 @@ function update(id) {
   })
   .then(() => alert("Updated"));
 }
+
+// LOAD DEFAULT
+showDashboard();
 </script>
 
 </body>
