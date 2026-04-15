@@ -5,75 +5,39 @@
 <title>Catalogue Pricelist</title>
 
 <style>
-body {
-  font-family: Arial;
-  background: #f4f4f4;
-  margin: 0;
-}
+body { font-family: Arial; background:#f4f4f4; margin:0; }
 
-/* HEADER */
 .header {
-  display: flex;
-  align-items: center;
-  padding: 15px 25px;
-  background: white;
-  border-bottom: 1px solid #ddd;
+  display:flex; align-items:center;
+  padding:15px 25px; background:#fff; border-bottom:1px solid #ddd;
 }
 
-.logo {
-  height: 45px;
-}
+.logo { height:45px; }
 
-/* TITLE */
 .title {
-  text-align: center;
-  font-size: 26px;
-  margin: 20px 0;
-  letter-spacing: 1px;
+  text-align:center; font-size:26px; margin:20px 0;
 }
 
-/* TABLE */
-.container {
-  width: 92%;
-  margin: auto;
-}
+.container { width:92%; margin:auto; }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
+  width:100%; border-collapse:collapse; background:#fff;
 }
 
 th {
-  background: #1f1f1f;
-  color: white;
-  padding: 14px;
-  text-align: left;
-  font-size: 14px;
+  background:#1f1f1f; color:#fff; padding:14px;
 }
 
 td {
-  padding: 14px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
+  padding:14px; border-bottom:1px solid #eee;
 }
 
-.right {
-  text-align: right;
-}
+.right { text-align:right; }
 
-tr:hover {
-  background: #fafafa;
-}
-
-/* FOOTER */
 .footer {
-  width: 92%;
-  margin: 20px auto;
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #555;
+  width:92%; margin:20px auto;
+  display:flex; justify-content:space-between;
+  font-size:13px; color:#555;
 }
 </style>
 </head>
@@ -87,7 +51,6 @@ tr:hover {
 <div class="title" id="catalogue">Loading...</div>
 
 <div class="container">
-
 <table>
 <thead>
 <tr>
@@ -97,11 +60,8 @@ tr:hover {
   <th class="right">RRP (₹)</th>
 </tr>
 </thead>
-
 <tbody id="data"></tbody>
-
 </table>
-
 </div>
 
 <div class="footer">
@@ -112,76 +72,44 @@ tr:hover {
 <script>
 const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
 
-// Get catalogue_id from URL
 let currentId = new URLSearchParams(window.location.search).get("catalogue_id");
 
 fetch(API)
 .then(r => r.json())
 .then(allData => {
 
-  console.log("DATA:", allData);
-
-  // ❌ No data at all
   if (!allData || allData.length === 0) {
-    document.body.innerHTML = "<h3>No data found in sheet</h3>";
+    document.body.innerHTML = "<h3>No data found</h3>";
     return;
   }
 
-  // Detect correct field name automatically
-  const sample = allData[0];
-  let catalogueKey = Object.keys(sample).find(k =>
-    k.toLowerCase().includes("catalogue")
-  );
+  if (!currentId) currentId = allData[0]["Cataloge ID"];
 
-  if (!catalogueKey) {
-    document.body.innerHTML = "<h3>CatalogueID column not found</h3>";
-    return;
-  }
+  renderCatalogue(allData, currentId);
 
-  // If no ID passed → use first
-  if (!currentId) currentId = sample[catalogueKey];
-
-  renderCatalogue(allData, currentId, catalogueKey);
-
-})
-.catch(err => {
-  document.body.innerHTML = "<h3>Error loading data</h3>";
-  console.error(err);
 });
 
-function renderCatalogue(allData, id, catalogueKey) {
+function renderCatalogue(allData, id) {
 
-  const data = allData.filter(x => x[catalogueKey] == id);
+  const data = allData.filter(x => x["Cataloge ID"] == id);
 
   if (!data.length) {
     document.body.innerHTML = "<h3>No catalogue found</h3>";
     return;
   }
 
-  // Safe field access
-  const first = data[0];
-
-  document.getElementById("catalogue").innerText =
-    first.CatalogueName || "Catalogue";
-
-  document.getElementById("logo").src =
-    first.LogoURL || "https://via.placeholder.com/120x40?text=LOGO";
+  document.getElementById("catalogue").innerText = id;
 
   let html = "";
 
   data.forEach(p => {
 
-    const name = p.VariantName || p["Variant Name"] || "-";
-    const hsn = p.HSN || "-";
-    const gst = p.GST || "0";
-    const rrp = p.RRP || "0";
-
     html += `
     <tr>
-      <td>${name}</td>
-      <td>${hsn}</td>
-      <td>${gst}</td>
-      <td class="right">₹ ${formatPrice(rrp)}</td>
+      <td>${p["Variant Name"] || "-"}</td>
+      <td>${p["HSN"] || "-"}</td>
+      <td>${p["GST %"] || "0"}</td>
+      <td class="right">₹ ${formatPrice(p["RRP"] || 0)}</td>
     </tr>`;
   });
 
@@ -191,7 +119,6 @@ function renderCatalogue(allData, id, catalogueKey) {
     "With effect from " + new Date().toLocaleDateString();
 }
 
-// Format ₹ nicely
 function formatPrice(num) {
   return Number(num).toLocaleString("en-IN");
 }
