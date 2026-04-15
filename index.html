@@ -3,45 +3,38 @@ const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
 
 let currentId = new URLSearchParams(window.location.search).get("catalogue_id");
 
+// 🔥 normalize function (VERY IMPORTANT)
+function clean(val) {
+  return String(val || "")
+    .replace(/\u00A0/g, "")   // remove non-breaking space
+    .trim()
+    .toUpperCase();
+}
+
 fetch(API)
 .then(r => r.json())
 .then(allData => {
 
-  console.log("FULL DATA:", allData);
+  console.log("RAW DATA:", allData);
 
   if (!allData.length) {
     document.body.innerHTML = "No data found";
     return;
   }
 
-  // 🔍 find correct column dynamically
-  const sample = allData[0];
-  const catalogueKey = Object.keys(sample).find(k =>
-    k.toLowerCase().includes("catalog")
-  );
-
-  console.log("Detected column:", catalogueKey);
-
-  if (!catalogueKey) {
-    document.body.innerHTML = "Catalogue column not found";
-    return;
-  }
-
-  // normalize function
-  const clean = (val) => String(val || "").trim().toUpperCase();
+  // 🔥 HARDCODE YOUR COLUMN (SAFE NOW)
+  const catalogueKey = "Cataloge ID";
 
   // normalize URL id
-  if (!currentId) currentId = clean(sample[catalogueKey]);
   currentId = clean(currentId);
 
   console.log("Looking for:", currentId);
 
-  // filter safely
   const data = allData.filter(x =>
     clean(x[catalogueKey]) === currentId
   );
 
-  console.log("Filtered:", data);
+  console.log("MATCHED DATA:", data);
 
   if (!data.length) {
     document.body.innerHTML = "No catalogue found";
