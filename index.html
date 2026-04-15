@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pricelist</title>
+<title>Catalogue Pricelist</title>
 
 <style>
 body {
   font-family: Arial;
-  background: #f5f5f5;
+  background: #f4f4f4;
   margin: 0;
 }
 
@@ -15,25 +15,26 @@ body {
 .header {
   display: flex;
   align-items: center;
-  padding: 15px 30px;
+  padding: 15px 25px;
   background: white;
   border-bottom: 1px solid #ddd;
 }
 
 .logo {
-  height: 40px;
+  height: 45px;
 }
 
+/* TITLE */
 .title {
   text-align: center;
-  font-size: 24px;
+  font-size: 26px;
   margin: 20px 0;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 /* TABLE */
 .container {
-  width: 90%;
+  width: 92%;
   margin: auto;
 }
 
@@ -44,28 +45,35 @@ table {
 }
 
 th {
-  background: #222;
+  background: #1f1f1f;
   color: white;
-  padding: 12px;
+  padding: 14px;
   text-align: left;
+  font-size: 14px;
 }
 
 td {
-  padding: 12px;
+  padding: 14px;
   border-bottom: 1px solid #eee;
+  font-size: 14px;
 }
 
 .right {
   text-align: right;
 }
 
+tr:hover {
+  background: #fafafa;
+}
+
 /* FOOTER */
 .footer {
-  width: 90%;
+  width: 92%;
   margin: 20px auto;
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: 13px;
+  color: #555;
 }
 </style>
 </head>
@@ -76,19 +84,17 @@ td {
   <img id="logo" class="logo">
 </div>
 
-<div class="title" id="catalogue"></div>
+<div class="title" id="catalogue">Loading...</div>
 
 <div class="container">
 
 <table>
 <thead>
 <tr>
-  <th>QUALITY</th>
+  <th>DESIGN / VARIANT</th>
   <th>HSN CODE</th>
-  <th>GST RATE %</th>
-  <th>RRP (₹)</th>
-  <th>GST AMOUNT (₹)</th>
-  <th>Total (₹)</th>
+  <th>GST %</th>
+  <th class="right">RRP (₹)</th>
 </tr>
 </thead>
 
@@ -99,46 +105,83 @@ td {
 </div>
 
 <div class="footer">
-  <div>© 2025 - Pricelist</div>
+  <div>© 2025 Pricelist</div>
   <div id="date"></div>
 </div>
 
 <script>
-const API = "https://sheetdb.io/api/v1/z4rjokjijd72d";
+const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
 
-const id = new URLSearchParams(window.location.search).get("catalogue_id");
+// Get catalogue_id from URL
+let currentId = new URLSearchParams(window.location.search).get("catalogue_id");
 
-fetch(API + "/search?CatalogueID=" + id)
+fetch(API)
 .then(r => r.json())
-.then(data => {
+.then(allData => {
 
-  if (!data.length) {
-    document.body.innerHTML = "No data found";
+  console.log("DATA:", allData);
+
+  // ❌ No data at all
+  if (!allData || allData.length === 0) {
+    document.body.innerHTML = "<h3>No data found in sheet</h3>";
     return;
   }
 
-  // Header
-  document.getElementById("logo").src = data[0].LogoURL;
-  document.getElementById("catalogue").innerText = data[0].CatalogueName;
+  // Detect correct field name automatically
+  const sample = allData[0];
+  let catalogueKey = Object.keys(sample).find(k =>
+    k.toLowerCase().includes("catalogue")
+  );
+
+  if (!catalogueKey) {
+    document.body.innerHTML = "<h3>CatalogueID column not found</h3>";
+    return;
+  }
+
+  // If no ID passed → use first
+  if (!currentId) currentId = sample[catalogueKey];
+
+  renderCatalogue(allData, currentId, catalogueKey);
+
+})
+.catch(err => {
+  document.body.innerHTML = "<h3>Error loading data</h3>";
+  console.error(err);
+});
+
+function renderCatalogue(allData, id, catalogueKey) {
+
+  const data = allData.filter(x => x[catalogueKey] == id);
+
+  if (!data.length) {
+    document.body.innerHTML = "<h3>No catalogue found</h3>";
+    return;
+  }
+
+  // Safe field access
+  const first = data[0];
+
+  document.getElementById("catalogue").innerText =
+    first.CatalogueName || "Catalogue";
+
+  document.getElementById("logo").src =
+    first.LogoURL || "https://via.placeholder.com/120x40?text=LOGO";
 
   let html = "";
 
   data.forEach(p => {
 
-    const rrp = parseFloat(p.RRP || 0);
-    const gst = parseFloat(p.GST || 0);
-
-    const gstAmount = (rrp * gst / 100).toFixed(2);
-    const total = (rrp + parseFloat(gstAmount)).toFixed(2);
+    const name = p.VariantName || p["Variant Name"] || "-";
+    const hsn = p.HSN || "-";
+    const gst = p.GST || "0";
+    const rrp = p.RRP || "0";
 
     html += `
     <tr>
-      <td>${p.VariantName}</td>
-      <td>${p.HSN}</td>
-      <td>${p.GST}</td>
-      <td class="right">${rrp}</td>
-      <td class="right">${gstAmount}</td>
-      <td class="right">${total}</td>
+      <td>${name}</td>
+      <td>${hsn}</td>
+      <td>${gst}</td>
+      <td class="right">₹ ${formatPrice(rrp)}</td>
     </tr>`;
   });
 
@@ -146,7 +189,12 @@ fetch(API + "/search?CatalogueID=" + id)
 
   document.getElementById("date").innerText =
     "With effect from " + new Date().toLocaleDateString();
-});
+}
+
+// Format ₹ nicely
+function formatPrice(num) {
+  return Number(num).toLocaleString("en-IN");
+}
 </script>
 
 </body>
