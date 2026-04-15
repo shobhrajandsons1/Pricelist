@@ -7,17 +7,31 @@ fetch(API)
 .then(r => r.json())
 .then(allData => {
 
-  console.log(allData);
+  console.log("DATA:", allData);
 
   if (!allData.length) {
     document.body.innerHTML = "No data found";
     return;
   }
 
-  // ✅ USE YOUR EXACT COLUMN NAME
-  if (!currentId) currentId = allData[0]["Cataloge ID"];
+  // 🔥 AUTO FIND CATALOGUE COLUMN
+  const sample = allData[0];
+  const catalogueKey = Object.keys(sample).find(k =>
+    k.toLowerCase().includes("catalog")
+  );
 
-  const data = allData.filter(x => x["Cataloge ID"] == currentId);
+  console.log("Catalogue Key:", catalogueKey);
+
+  if (!catalogueKey) {
+    document.body.innerHTML = "Catalogue column not found";
+    return;
+  }
+
+  // Default ID
+  if (!currentId) currentId = sample[catalogueKey];
+
+  // Filter
+  const data = allData.filter(x => x[catalogueKey] == currentId);
 
   if (!data.length) {
     document.body.innerHTML = "No catalogue found";
@@ -37,5 +51,6 @@ fetch(API)
   });
 
   document.getElementById("data").innerHTML = html;
+
 });
 </script>
