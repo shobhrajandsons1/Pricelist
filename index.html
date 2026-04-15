@@ -7,31 +7,41 @@ fetch(API)
 .then(r => r.json())
 .then(allData => {
 
-  console.log("DATA:", allData);
+  console.log("FULL DATA:", allData);
 
   if (!allData.length) {
     document.body.innerHTML = "No data found";
     return;
   }
 
-  // 🔥 AUTO FIND CATALOGUE COLUMN
+  // 🔍 find correct column dynamically
   const sample = allData[0];
   const catalogueKey = Object.keys(sample).find(k =>
     k.toLowerCase().includes("catalog")
   );
 
-  console.log("Catalogue Key:", catalogueKey);
+  console.log("Detected column:", catalogueKey);
 
   if (!catalogueKey) {
     document.body.innerHTML = "Catalogue column not found";
     return;
   }
 
-  // Default ID
-  if (!currentId) currentId = sample[catalogueKey];
+  // normalize function
+  const clean = (val) => String(val || "").trim().toUpperCase();
 
-  // Filter
-  const data = allData.filter(x => x[catalogueKey] == currentId);
+  // normalize URL id
+  if (!currentId) currentId = clean(sample[catalogueKey]);
+  currentId = clean(currentId);
+
+  console.log("Looking for:", currentId);
+
+  // filter safely
+  const data = allData.filter(x =>
+    clean(x[catalogueKey]) === currentId
+  );
+
+  console.log("Filtered:", data);
 
   if (!data.length) {
     document.body.innerHTML = "No catalogue found";
