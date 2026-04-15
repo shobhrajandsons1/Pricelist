@@ -26,10 +26,6 @@ body {
   color: #f5a623;
 }
 
-.menu {
-  padding: 10px;
-}
-
 .menu div {
   padding: 12px 15px;
   margin: 5px;
@@ -94,13 +90,14 @@ input {
   width: 80px;
 }
 </style>
+
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>The Crafted Corners</h2>
+  <h2>Admin Panel</h2>
 
   <div class="menu">
     <div class="active" onclick="showDashboard()">Dashboard</div>
@@ -112,11 +109,11 @@ input {
 <div class="main">
 
   <h1>Dashboard</h1>
-  <p>Overview of your interior products business</p>
+  <p>Overview of your catalogue system</p>
 
   <div class="cards">
     <div class="card">
-      <h3>Variants</h3>
+      <h3>Total Variants</h3>
       <p id="variantCount">0</p>
     </div>
   </div>
@@ -126,55 +123,82 @@ input {
 </div>
 
 <script>
-const API = "https://sheetdb.io/api/v1/z4rjokjijd72d";
+const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
 
-// DASHBOARD LOAD
+let allData = [];
+let idKey = "";
+
+// LOAD DATA
+fetch(API)
+.then(r => r.json())
+.then(data => {
+
+  console.log("ADMIN DATA:", data);
+
+  if (!data || data.length === 0) {
+    document.body.innerHTML = "No data found in sheet";
+    return;
+  }
+
+  allData = data;
+
+  // detect ID column automatically
+  const sample = data[0];
+  idKey = Object.keys(sample).find(k =>
+    k.toLowerCase().includes("variant")
+  );
+
+  document.getElementById("variantCount").innerText = data.length;
+
+})
+.catch(err => {
+  document.body.innerHTML = "Error loading data";
+});
+
+// DASHBOARD
 function showDashboard() {
-  fetch(API)
-  .then(r => r.json())
-  .then(data => {
-
-    document.getElementById("variantCount").innerText = data.length;
-
-    document.getElementById("table").innerHTML = "";
-  });
+  document.getElementById("table").innerHTML = "";
 }
 
 // LOAD VARIANTS
 function loadVariants() {
-  fetch(API)
-  .then(r => r.json())
-  .then(data => {
 
-    let html = "<tr><th>Name</th><th>Price</th><th>Update</th></tr>";
+  let html = "<tr><th>Variant</th><th>Price</th><th>Update</th></tr>";
 
-    data.forEach(p => {
-      html += `
-      <tr>
-        <td>${p.VariantName || ""}</td>
-        <td><input id="${p.VariantID}" value="${p.RRP || ""}"></td>
-        <td><button onclick="update('${p.VariantID}')">Save</button></td>
-      </tr>`;
-    });
+  allData.forEach(p => {
 
-    document.getElementById("table").innerHTML = html;
+    const name = p.VariantName || p["Variant Name"] || "-";
+    const id = p[idKey];
+    const price = p.RRP || "0";
+
+    html += `
+    <tr>
+      <td>${name}</td>
+      <td><input id="${id}" value="${price}"></td>
+      <td><button onclick="update('${id}')">Save</button></td>
+    </tr>`;
   });
+
+  document.getElementById("table").innerHTML = html;
 }
 
 // UPDATE PRICE
 function update(id) {
-  const val = document.getElementById(id).value;
 
-  fetch(API + "/VariantID/" + id, {
+  const value = document.getElementById(id).value;
+
+  fetch(API + "/" + idKey + "/" + id, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: { RRP: val } })
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      data: { RRP: value }
+    })
   })
-  .then(() => alert("Updated"));
+  .then(() => alert("Updated successfully"))
+  .catch(() => alert("Update failed"));
 }
-
-// LOAD DEFAULT
-showDashboard();
 </script>
 
 </body>
