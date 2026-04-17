@@ -134,28 +134,35 @@ fetch(CATALOGUE_API)
 .then(res => res.json())
 .then(catalogues => {
 
-  const cat = catalogues.find(c => clean(c.CatalogueID) === currentId);
+  const cat = catalogues.find(c =>
+    clean(c.CatalogueID) === currentId
+  );
 
   if (!cat) {
     document.body.innerHTML = "Catalogue not found";
     return;
   }
 
-  // Set catalogue name
-  document.getElementById("catalogueName").innerText = cat.CatalogueName;
+  // Catalogue Name
+  document.getElementById("catalogueName").innerText =
+    cat.CatalogueName;
 
-  // Load brand details
+  // BRAND FETCH (FIXED FOR SPACE HEADERS)
   fetch(BRAND_API)
   .then(res => res.json())
   .then(brands => {
 
-    const brand = brands.find(b => clean(b.BrandID) === clean(cat.BrandID));
+    const brand = brands.find(b =>
+      clean(b["Brand ID"]) === clean(cat.BrandID)
+    );
 
     if (brand) {
-      document.getElementById("brandName").innerText = brand.BrandName || "Brand";
+      document.getElementById("brandName").innerText =
+        brand["Brand Name"] || "Brand";
 
-      if (brand.LogoURL) {
-        document.getElementById("brandLogo").src = brand.LogoURL;
+      if (brand["Logo URL"]) {
+        document.getElementById("brandLogo").src =
+          brand["Logo URL"];
       }
     }
 
