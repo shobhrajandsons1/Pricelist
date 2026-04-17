@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Panel</title>
+  <title>Admin Dashboard</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
+      margin: 0;
       font-family: Arial;
       display: flex;
-      margin: 0;
+      background: #f4f6f9;
     }
 
+    /* SIDEBAR */
     .sidebar {
       width: 220px;
-      background: #1e2a3a;
+      background: #111827;
       color: white;
       height: 100vh;
       padding: 20px;
     }
 
     .sidebar h2 {
-      color: #f5b041;
+      margin-bottom: 20px;
     }
 
     .menu {
-      margin-top: 20px;
-      cursor: pointer;
+      margin: 10px 0;
       padding: 10px;
-      border-radius: 5px;
+      cursor: pointer;
+      border-radius: 6px;
     }
 
     .menu:hover {
-      background: #2e4053;
+      background: #1f2937;
     }
 
-    .content {
+    /* MAIN */
+    .main {
       flex: 1;
       padding: 20px;
     }
 
-    input, select {
+    input {
       padding: 10px;
       margin: 5px;
       width: 200px;
@@ -46,24 +51,42 @@
 
     button {
       padding: 10px 15px;
-      background: #1e2a3a;
+      background: #111827;
       color: white;
       border: none;
       cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .logout {
+      margin-top: 20px;
+      background: red;
     }
   </style>
 </head>
 
 <body>
 
+<!-- AUTH CHECK -->
+<script>
+if (localStorage.getItem("auth") !== "true") {
+  window.location.href = "login.html";
+}
+</script>
+
+<!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>The Crafted Corners</h2>
+  <h2>Admin Panel</h2>
 
   <div class="menu" onclick="show('variant')">Add Variant</div>
+
+  <button class="logout" onclick="logout()">Logout</button>
 </div>
 
-<div class="content">
+<!-- MAIN CONTENT -->
+<div class="main">
 
+  <!-- VARIANT FORM -->
   <div id="variant">
     <h2>Add Variant</h2>
 
@@ -81,12 +104,18 @@
 <script>
 const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
 
-// generate ID
+// LOGOUT
+function logout() {
+  localStorage.removeItem("auth");
+  window.location.href = "login.html";
+}
+
+// GENERATE VARIANT ID
 function generateID() {
   return "VAR" + Math.floor(1000 + Math.random() * 9000);
 }
 
-// save data
+// SAVE DATA
 function save() {
 
   const data = {
@@ -103,9 +132,8 @@ function save() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ data: [data] })
   })
-  .then(res => res.json())
   .then(() => {
-    alert("Saved!");
+    alert("Variant Added Successfully");
   });
 
 }
