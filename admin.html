@@ -1,52 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      display: flex;
+      margin: 0;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #1e2a3a;
+      color: white;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .sidebar h2 {
+      color: #f5b041;
+    }
+
+    .menu {
+      margin-top: 20px;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .menu:hover {
+      background: #2e4053;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+    }
+
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background: #1e2a3a;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>The Crafted Corners</h2>
+
+  <div class="menu" onclick="show('variant')">Add Variant</div>
+</div>
+
+<div class="content">
+
+  <div id="variant">
+    <h2>Add Variant</h2>
+
+    <input id="name" placeholder="Variant Name"><br>
+    <input id="catalogue" placeholder="Catalogue ID (CAT001)"><br>
+    <input id="hsn" placeholder="HSN"><br>
+    <input id="gst" placeholder="GST"><br>
+    <input id="rrp" placeholder="RRP"><br>
+
+    <button onclick="save()">Save</button>
+  </div>
+
+</div>
+
 <script>
 const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
 
-let allData = [];
+// generate ID
+function generateID() {
+  return "VAR" + Math.floor(1000 + Math.random() * 9000);
+}
 
-fetch(API)
-.then(r => r.json())
-.then(data => {
+// save data
+function save() {
 
-  console.log(data);
+  const data = {
+    VariantID: generateID(),
+    CatalogueID: document.getElementById("catalogue").value,
+    VariantName: document.getElementById("name").value,
+    HSN: document.getElementById("hsn").value,
+    GST: document.getElementById("gst").value,
+    RRP: document.getElementById("rrp").value
+  };
 
-  if (!data.length) {
-    document.body.innerHTML = "No data";
-    return;
-  }
-
-  allData = data;
-  document.getElementById("count").innerText = data.length;
-
-});
-
-function loadVariants() {
-
-  let html = "<tr><th>Variant</th><th>Price</th><th>Update</th></tr>";
-
-  allData.forEach(p => {
-
-    html += `
-    <tr>
-      <td>${p["Variant Name"]}</td>
-      <td><input id="${p["Variant ID"]}" value="${p["RRP"]}"></td>
-      <td><button onclick="update('${p["Variant ID"]}')">Save</button></td>
-    </tr>`;
+  fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: [data] })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Saved!");
   });
 
-  document.getElementById("table").innerHTML = html;
-}
-
-function update(id) {
-
-  const val = document.getElementById(id).value;
-
-  fetch(API + "/Variant ID/" + id, {
-    method: "PATCH",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      data: { RRP: val }
-    })
-  })
-  .then(() => alert("Updated"));
 }
 </script>
+
+</body>
+</html>
