@@ -7,8 +7,8 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial;
-      background: #f5f5f5;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
     }
 
     /* HEADER */
@@ -16,9 +16,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
-      background: white;
-      border-bottom: 1px solid #ddd;
+      padding: 15px 25px;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .logo img {
@@ -28,47 +28,62 @@
     .brandName {
       font-size: 18px;
       font-weight: 600;
+      color: #1f2937;
     }
 
-    /* Catalogue Title */
+    /* TITLE */
     .catalogueTitle {
       text-align: center;
-      font-size: 28px;
-      font-weight: bold;
-      margin: 15px 0;
+      font-size: 32px;
+      font-weight: 700;
+      margin: 20px 0 10px;
+      color: #111827;
     }
 
-    /* TABLE */
+    /* CARD CONTAINER */
     .container {
       padding: 20px;
+      max-width: 1100px;
+      margin: auto;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .card {
       background: white;
-      border-radius: 8px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
       overflow: hidden;
     }
 
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
     th, td {
-      padding: 14px;
+      padding: 16px;
       text-align: center;
     }
 
     th {
-      background: #222;
+      background: #111827;
       color: white;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
 
     tr {
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #f1f1f1;
+    }
+
+    tr:hover {
+      background: #fafafa;
     }
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .catalogueTitle {
-        font-size: 20px;
+        font-size: 22px;
       }
 
       th, td {
@@ -81,36 +96,30 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <div class="logo">
-    <img id="brandLogo" src="" alt="Logo">
+    <img id="brandLogo" src="">
   </div>
 
-  <div class="brandName" id="brandName">
-    Loading...
-  </div>
+  <div class="brandName" id="brandName">Loading...</div>
 </div>
 
-<!-- Catalogue Name -->
-<div class="catalogueTitle" id="catalogueName">
-  Loading...
-</div>
+<div class="catalogueTitle" id="catalogueName">Loading...</div>
 
-<!-- TABLE -->
 <div class="container">
-  <table>
-    <thead>
-      <tr>
-        <th>Variant</th>
-        <th>HSN</th>
-        <th>GST %</th>
-        <th>RRP (₹)</th>
-      </tr>
-    </thead>
-
-    <tbody id="data"></tbody>
-  </table>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Variant</th>
+          <th>HSN</th>
+          <th>GST %</th>
+          <th>RRP (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="data"></tbody>
+    </table>
+  </div>
 </div>
 
 <script>
@@ -129,25 +138,19 @@ if (!currentId) {
   document.body.innerHTML = "No catalogue selected";
 }
 
-// STEP 1: LOAD CATALOGUE + BRAND
 fetch(CATALOGUE_API)
 .then(res => res.json())
 .then(catalogues => {
 
-  const cat = catalogues.find(c =>
-    clean(c.CatalogueID) === currentId
-  );
+  const cat = catalogues.find(c => clean(c.CatalogueID) === currentId);
 
   if (!cat) {
     document.body.innerHTML = "Catalogue not found";
     return;
   }
 
-  // Catalogue Name
-  document.getElementById("catalogueName").innerText =
-    cat.CatalogueName;
+  document.getElementById("catalogueName").innerText = cat.CatalogueName;
 
-  // BRAND FETCH (FIXED FOR SPACE HEADERS)
   fetch(BRAND_API)
   .then(res => res.json())
   .then(brands => {
@@ -158,7 +161,7 @@ fetch(CATALOGUE_API)
 
     if (brand) {
       document.getElementById("brandName").innerText =
-        brand["Brand Name"] || "Brand";
+        brand["Brand Name"];
 
       if (brand["Logo URL"]) {
         document.getElementById("brandLogo").src =
@@ -170,7 +173,6 @@ fetch(CATALOGUE_API)
 
 });
 
-// STEP 2: LOAD VARIANTS
 fetch(VARIANT_API)
 .then(res => res.json())
 .then(data => {
