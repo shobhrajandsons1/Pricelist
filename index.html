@@ -1,59 +1,55 @@
 <script>
-const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
+const API = "https://sheetdb.io/api/v1/tbkom437rmn5o?sheet=Variants";
 
-let currentId = new URLSearchParams(window.location.search).get("catalogue_id");
-
-// 🔥 normalize function (VERY IMPORTANT)
+// clean helper
 function clean(val) {
-  return String(val || "")
-    .replace(/\u00A0/g, "")   // remove non-breaking space
-    .trim()
-    .toUpperCase();
+  return (val || "").toString().trim().toUpperCase();
 }
 
+// get catalogue from URL
+const params = new URLSearchParams(window.location.search);
+let currentId = clean(params.get("catalogue"));
+
 fetch(API)
-.then(r => r.json())
-.then(allData => {
+.then(res => res.json())
+.then(data => {
 
-  console.log("RAW DATA:", allData);
+  console.log("DATA:", data);
 
-  if (!allData.length) {
+  if (!data || data.length === 0) {
     document.body.innerHTML = "No data found";
     return;
   }
 
-  // 🔥 HARDCODE YOUR COLUMN (SAFE NOW)
-  const catalogueKey = "Cataloge ID";
-
-  // normalize URL id
-  currentId = clean(currentId);
-
-  console.log("Looking for:", currentId);
-
-  const data = allData.filter(x =>
-    clean(x[catalogueKey]) === currentId
+  // filter correctly
+  const filtered = data.filter(row =>
+    clean(row.CatalogueID) === currentId
   );
 
-  console.log("MATCHED DATA:", data);
+  console.log("FILTERED:", filtered);
 
-  if (!data.length) {
+  if (!filtered.length) {
     document.body.innerHTML = "No catalogue found";
     return;
   }
 
   let html = "";
 
-  data.forEach(p => {
+  filtered.forEach(p => {
     html += `
-    <tr>
-      <td>${p["Variant Name"]}</td>
-      <td>${p["HSN"]}</td>
-      <td>${p["GST %"]}</td>
-      <td class="right">₹ ${Number(p["RRP"]).toLocaleString("en-IN")}</td>
-    </tr>`;
+      <tr>
+        <td>${p.VariantName || "-"}</td>
+        <td>${p.HSN || "-"}</td>
+        <td>${p.GST || "0"}</td>
+        <td>₹ ${Number(p.RRP || 0).toLocaleString("en-IN")}</td>
+      </tr>
+    `;
   });
 
   document.getElementById("data").innerHTML = html;
-
+})
+.catch(err => {
+  console.error(err);
+  document.body.innerHTML = "Error loading data";
 });
 </script>
