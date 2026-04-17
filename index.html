@@ -6,30 +6,36 @@
 
   <style>
     body {
-      font-family: Arial;
       margin: 0;
+      font-family: Arial;
       background: #f5f5f5;
     }
 
     /* HEADER */
     .header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       padding: 15px 20px;
       background: white;
       border-bottom: 1px solid #ddd;
     }
 
     .logo img {
-      height: 40px;
+      height: 45px;
     }
 
-    .title {
+    .brandName {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* Catalogue Title */
+    .catalogueTitle {
       text-align: center;
-      flex: 1;
-      font-size: 26px;
+      font-size: 28px;
       font-weight: bold;
+      margin: 15px 0;
     }
 
     /* TABLE */
@@ -53,7 +59,6 @@
     th {
       background: #222;
       color: white;
-      font-weight: 600;
     }
 
     tr {
@@ -62,8 +67,8 @@
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-      .title {
-        font-size: 18px;
+      .catalogueTitle {
+        font-size: 20px;
       }
 
       th, td {
@@ -82,11 +87,14 @@
     <img id="brandLogo" src="" alt="Logo">
   </div>
 
-  <div class="title" id="catalogueName">
+  <div class="brandName" id="brandName">
     Loading...
   </div>
+</div>
 
-  <div style="width:40px;"></div>
+<!-- Catalogue Name -->
+<div class="catalogueTitle" id="catalogueName">
+  Loading...
 </div>
 
 <!-- TABLE -->
@@ -110,12 +118,10 @@ const VARIANT_API = "https://sheetdb.io/api/v1/tbkom437rmn5o?sheet=Variants";
 const CATALOGUE_API = "https://sheetdb.io/api/v1/tbkom437rmn5o?sheet=Catalogues";
 const BRAND_API = "https://sheetdb.io/api/v1/tbkom437rmn5o?sheet=Brand";
 
-// helper
 function clean(val) {
   return (val || "").toString().trim().toUpperCase();
 }
 
-// get catalogue id
 const params = new URLSearchParams(window.location.search);
 const currentId = clean(params.get("catalogue"));
 
@@ -123,7 +129,7 @@ if (!currentId) {
   document.body.innerHTML = "No catalogue selected";
 }
 
-// STEP 1: LOAD CATALOGUE NAME + BRAND
+// STEP 1: LOAD CATALOGUE + BRAND
 fetch(CATALOGUE_API)
 .then(res => res.json())
 .then(catalogues => {
@@ -135,18 +141,22 @@ fetch(CATALOGUE_API)
     return;
   }
 
-  // set catalogue name
+  // Set catalogue name
   document.getElementById("catalogueName").innerText = cat.CatalogueName;
 
-  // load brand
+  // Load brand details
   fetch(BRAND_API)
   .then(res => res.json())
   .then(brands => {
 
     const brand = brands.find(b => clean(b.BrandID) === clean(cat.BrandID));
 
-    if (brand && brand.LogoURL) {
-      document.getElementById("brandLogo").src = brand.LogoURL;
+    if (brand) {
+      document.getElementById("brandName").innerText = brand.BrandName || "Brand";
+
+      if (brand.LogoURL) {
+        document.getElementById("brandLogo").src = brand.LogoURL;
+      }
     }
 
   });
@@ -163,7 +173,8 @@ fetch(VARIANT_API)
   );
 
   if (!filtered.length) {
-    document.getElementById("data").innerHTML = "<tr><td colspan='4'>No data found</td></tr>";
+    document.getElementById("data").innerHTML =
+      "<tr><td colspan='4'>No data found</td></tr>";
     return;
   }
 
