@@ -12,21 +12,28 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
 
     .login-box {
       background: white;
       padding: 30px;
-      border-radius: 10px;
+      border-radius: 12px;
       width: 300px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
     }
 
     input {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
     }
 
     button {
@@ -35,7 +42,12 @@
       background: #111827;
       color: white;
       border: none;
+      border-radius: 6px;
       cursor: pointer;
+    }
+
+    button:hover {
+      background: #000;
     }
   </style>
 </head>
@@ -52,8 +64,8 @@
 </div>
 
 <script>
-const USER = "admin";
-const PASS = "1234";
+const USER = "admin";     // 🔐 change this
+const PASS = "1234";      // 🔐 change this
 
 function login() {
   const u = document.getElementById("username").value;
@@ -63,7 +75,7 @@ function login() {
     localStorage.setItem("auth", "true");
     window.location.href = "admin.html";
   } else {
-    alert("Invalid login");
+    alert("Invalid username or password");
   }
 }
 </script>
