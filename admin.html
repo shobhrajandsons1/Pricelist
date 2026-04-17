@@ -1,235 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Admin Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      background: #f4f6f9;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 240px;
-      background: #111827;
-      color: white;
-      height: 100vh;
-      padding: 20px;
-    }
-
-    .sidebar h2 {
-      margin-bottom: 30px;
-      font-size: 20px;
-    }
-
-    .menu {
-      padding: 12px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-
-    .menu:hover {
-      background: #1f2937;
-    }
-
-    .logout {
-      margin-top: 30px;
-      background: red;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-
-    /* MAIN */
-    .main {
-      flex: 1;
-      padding: 25px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-
-    input, select {
-      padding: 10px;
-      margin: 5px;
-      width: 220px;
-    }
-
-    button {
-      padding: 10px 15px;
-      background: #111827;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-
-    h2 {
-      margin-top: 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Admin Dashboard</title>
 </head>
-
 <body>
-
-<!-- LOGIN PROTECTION -->
-<script>
-if (localStorage.getItem("auth") !== "true") {
-  window.location.href = "login.html";
-}
-</script>
-
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <h2>The Crafted Corners</h2>
-
-  <div class="menu" onclick="showTab('dashboard')">Dashboard</div>
-  <div class="menu" onclick="showTab('brands')">Brands</div>
-  <div class="menu" onclick="showTab('catalogues')">Catalogues</div>
-  <div class="menu" onclick="showTab('variants')">Variants</div>
-
-  <div class="logout" onclick="logout()">Logout</div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="main">
-
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="card">
-    <h2>Dashboard</h2>
-    <p>Welcome to your admin panel</p>
-  </div>
-
-  <!-- BRANDS -->
-  <div id="brands" class="card" style="display:none;">
-    <h2>Add Brand</h2>
-
-    <input id="brandName" placeholder="Brand Name">
-    <input id="logoURL" placeholder="Logo URL">
-
-    <button onclick="addBrand()">Save Brand</button>
-  </div>
-
-  <!-- CATALOGUES -->
-  <div id="catalogues" class="card" style="display:none;">
-    <h2>Add Catalogue</h2>
-
-    <input id="catName" placeholder="Catalogue Name">
-    <input id="catBrand" placeholder="Brand ID (BR001)">
-    <input id="catCategory" placeholder="Category Code">
-
-    <button onclick="addCatalogue()">Save Catalogue</button>
-  </div>
-
-  <!-- VARIANTS -->
-  <div id="variants" class="card" style="display:none;">
-    <h2>Add Variant</h2>
-
-    <input id="vName" placeholder="Variant Name">
-    <input id="vCat" placeholder="Catalogue ID (CAT001)">
-    <input id="vHSN" placeholder="HSN">
-    <input id="vGST" placeholder="GST">
-    <input id="vRRP" placeholder="RRP">
-
-    <button onclick="addVariant()">Save Variant</button>
-  </div>
-
-</div>
-
-<script>
-const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
-
-// TAB SWITCH
-function showTab(tab) {
-  ["dashboard","brands","catalogues","variants"].forEach(id => {
-    document.getElementById(id).style.display = "none";
-  });
-  document.getElementById(tab).style.display = "block";
-}
-
-// LOGOUT
-function logout() {
-  localStorage.removeItem("auth");
-  window.location.href = "login.html";
-}
-
-// GENERATE IDs
-function genBrandID() {
-  return "BR" + Date.now();
-}
-
-function genCatID() {
-  return "CAT" + Date.now();
-}
-
-function genVarID() {
-  return "VAR" + Date.now();
-}
-
-// ADD BRAND
-function addBrand() {
-  const data = {
-    "Brand ID": genBrandID(),
-    "Brand Name": document.getElementById("brandName").value,
-    "Logo URL": document.getElementById("logoURL").value
-  };
-
-  fetch(API + "?sheet=Brand", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({data:[data]})
-  }).then(() => alert("Brand Added"));
-}
-
-// ADD CATALOGUE
-function addCatalogue() {
-  const id = genCatID();
-
-  const data = {
-    CatalogueID: id,
-    BrandID: document.getElementById("catBrand").value,
-    CategoryCode: document.getElementById("catCategory").value,
-    CatalogueName: document.getElementById("catName").value,
-    Status: "Active",
-    URL: `https://shobhrajandsons.github.io/Pricelist/?catalogue=${id}`
-  };
-
-  fetch(API + "?sheet=Catalogues", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({data:[data]})
-  }).then(() => alert("Catalogue Added"));
-}
-
-// ADD VARIANT
-function addVariant() {
-  const data = {
-    VariantID: genVarID(),
-    CatalogueID: document.getElementById("vCat").value,
-    VariantName: document.getElementById("vName").value,
-    HSN: document.getElementById("vHSN").value,
-    GST: document.getElementById("vGST").value,
-    RRP: document.getElementById("vRRP").value
-  };
-
-  fetch(API + "?sheet=Variants", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({data:[data]})
-  }).then(() => alert("Variant Added"));
-}
-</script>
-
+    <header>
+        <h1>Admin Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="#tab1">Tab 1</a></li>
+                <li><a href="#tab2">Tab 2</a></li>
+                <li><a href="#tab3">Tab 3</a></li>
+                <li><a href="#tab4">Tab 4</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="tab1" class="tab">
+            <h2>Tab 1 Content</h2>
+            <p>This is the content for Tab 1.</p>
+        </section>
+        <section id="tab2" class="tab">
+            <h2>Tab 2 Content</h2>
+            <p>This is the content for Tab 2.</p>
+        </section>
+        <section id="tab3" class="tab">
+            <h2>Tab 3 Content</h2>
+            <p>This is the content for Tab 3.</p>
+        </section>
+        <section id="tab4" class="tab">
+            <h2>Tab 4 Content</h2>
+            <p>This is the content for Tab 4.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 Shobhraj and Sons. All rights reserved.</p>
+    </footer>
+    <script>
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.style.display = 'none';
+            });
+            document.getElementById(tabId).style.display = 'block';
+        }
+        document.querySelectorAll('nav ul li a').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const tabId = this.getAttribute('href').substring(1);
+                showTab(tabId);
+            });
+        });
+        // Show the first tab by default
+        showTab('tab1');
+    </script>
 </body>
 </html>
