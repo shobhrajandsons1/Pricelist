@@ -1,7 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pricelist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background: #222;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1 id="title">Pricelist</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variant</th>
+      <th>HSN</th>
+      <th>GST %</th>
+      <th>RRP (₹)</th>
+    </tr>
+  </thead>
+
+  <!-- IMPORTANT -->
+  <tbody id="data"></tbody>
+</table>
+
 <script>
 const API = "https://sheetdb.io/api/v1/tbkom437rmn5o?sheet=Variants";
 
-// clean helper
 function clean(val) {
   return (val || "").toString().trim().toUpperCase();
 }
@@ -10,23 +63,18 @@ function clean(val) {
 const params = new URLSearchParams(window.location.search);
 let currentId = clean(params.get("catalogue"));
 
+if (!currentId) {
+  document.body.innerHTML = "No catalogue selected";
+}
+
+// fetch data
 fetch(API)
 .then(res => res.json())
 .then(data => {
 
-  console.log("DATA:", data);
-
-  if (!data || data.length === 0) {
-    document.body.innerHTML = "No data found";
-    return;
-  }
-
-  // filter correctly
   const filtered = data.filter(row =>
     clean(row.CatalogueID) === currentId
   );
-
-  console.log("FILTERED:", filtered);
 
   if (!filtered.length) {
     document.body.innerHTML = "No catalogue found";
@@ -47,9 +95,9 @@ fetch(API)
   });
 
   document.getElementById("data").innerHTML = html;
-})
-.catch(err => {
-  console.error(err);
-  document.body.innerHTML = "Error loading data";
+
 });
 </script>
+
+</body>
+</html>
