@@ -3,59 +3,548 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
     <title>Admin Dashboard</title>
-</head>
-<body>
-    <header>
-        <h1>Admin Dashboard</h1>
-        <nav>
-            <ul>
-                <li><a href="#tab1">Tab 1</a></li>
-                <li><a href="#tab2">Tab 2</a></li>
-                <li><a href="#tab3">Tab 3</a></li>
-                <li><a href="#tab4">Tab 4</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section id="tab1" class="tab">
-            <h2>Tab 1 Content</h2>
-            <p>This is the content for Tab 1.</p>
-        </section>
-        <section id="tab2" class="tab">
-            <h2>Tab 2 Content</h2>
-            <p>This is the content for Tab 2.</p>
-        </section>
-        <section id="tab3" class="tab">
-            <h2>Tab 3 Content</h2>
-            <p>This is the content for Tab 3.</p>
-        </section>
-        <section id="tab4" class="tab">
-            <h2>Tab 4 Content</h2>
-            <p>This is the content for Tab 4.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Shobhraj and Sons. All rights reserved.</p>
-    </footer>
-    <script>
-        function showTab(tabId) {
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                tab.style.display = 'none';
-            });
-            document.getElementById(tabId).style.display = 'block';
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        document.querySelectorAll('nav ul li a').forEach(link => {
-            link.addEventListener('click', function(event) {
-                event.preventDefault();
-                const tabId = this.getAttribute('href').substring(1);
-                showTab(tabId);
-            });
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            display: flex;
+        }
+
+        /* SIDEBAR STYLING */
+        .sidebar {
+            width: 240px;
+            background: #111827;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            font-size: 20px;
+            color: white;
+        }
+
+        .menu {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu:hover {
+            background: #1f2937;
+            transform: translateX(5px);
+        }
+
+        .menu.active {
+            background: #3b82f6;
+            font-weight: bold;
+        }
+
+        .logout {
+            margin-top: 30px;
+            background: #dc2626;
+            padding: 12px 15px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        .logout:hover {
+            background: #b91c1c;
+        }
+
+        /* MAIN CONTENT AREA */
+        .main {
+            flex: 1;
+            margin-left: 240px;
+            padding: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: none;
+        }
+
+        .card.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        /* FORM STYLING */
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #111827;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #1f2937;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* TABLE STYLING */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table tr:hover {
+            background: #f9fafb;
+        }
+
+        /* DASHBOARD STATS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box h3 {
+            margin: 10px 0;
+            font-size: 28px;
+        }
+
+        .stat-box p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 10px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .form-group {
+                flex-direction: column;
+            }
+
+            input, select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- LOGIN PROTECTION -->
+<script>
+    if (localStorage.getItem("auth") !== "true") {
+        window.location.href = "login.html";
+    }
+</script>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>The Crafted Corners</h2>
+
+    <div class="menu active" onclick="showTab('dashboard', this)">📊 Dashboard</div>
+    <div class="menu" onclick="showTab('brands', this)">🏷️ Brands</div>
+    <div class="menu" onclick="showTab('catalogues', this)">📚 Catalogues</div>
+    <div class="menu" onclick="showTab('variants', this)">🎨 Variants</div>
+
+    <div class="logout" onclick="logout()">🚪 Logout</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="card active">
+        <h2>Dashboard</h2>
+        <p>Welcome to your admin panel!</p>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <p>Total Brands</p>
+                <h3 id="brandCount">0</h3>
+            </div>
+            <div class="stat-box">
+                <p>Total Catalogues</p>
+                <h3 id="catalogueCount">0</h3>
+            </div>
+            <div class="stat-box">
+                <p>Total Variants</p>
+                <h3 id="variantCount">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- BRANDS -->
+    <div id="brands" class="card">
+        <h2>Add Brand</h2>
+        
+        <div class="form-group">
+            <input id="brandName" placeholder="Brand Name" type="text">
+            <input id="logoURL" placeholder="Logo URL" type="text">
+            <button onclick="addBrand()">Save Brand</button>
+        </div>
+
+        <table id="brandTable">
+            <thead>
+                <tr>
+                    <th>Brand ID</th>
+                    <th>Brand Name</th>
+                    <th>Logo</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- CATALOGUES -->
+    <div id="catalogues" class="card">
+        <h2>Add Catalogue</h2>
+        
+        <div class="form-group">
+            <input id="catName" placeholder="Catalogue Name" type="text">
+            <input id="catBrand" placeholder="Brand ID (BR001)" type="text">
+            <input id="catCategory" placeholder="Category Code" type="text">
+            <button onclick="addCatalogue()">Save Catalogue</button>
+        </div>
+
+        <table id="catalogueTable">
+            <thead>
+                <tr>
+                    <th>Catalogue ID</th>
+                    <th>Catalogue Name</th>
+                    <th>Brand ID</th>
+                    <th>Category Code</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- VARIANTS -->
+    <div id="variants" class="card">
+        <h2>Add Variant</h2>
+        
+        <div class="form-group">
+            <input id="vName" placeholder="Variant Name" type="text">
+            <input id="vCat" placeholder="Catalogue ID (CAT001)" type="text">
+            <input id="vHSN" placeholder="HSN" type="text">
+            <input id="vGST" placeholder="GST %" type="number">
+            <input id="vRRP" placeholder="RRP" type="number">
+            <button onclick="addVariant()">Save Variant</button>
+        </div>
+
+        <table id="variantTable">
+            <thead>
+                <tr>
+                    <th>Variant ID</th>
+                    <th>Variant Name</th>
+                    <th>Catalogue ID</th>
+                    <th>HSN</th>
+                    <th>GST</th>
+                    <th>RRP</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    const API = "https://sheetdb.io/api/v1/tbkom437rmn5o";
+
+    // TAB SWITCH
+    function showTab(tab, element) {
+        // Hide all cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.classList.remove('active');
         });
-        // Show the first tab by default
-        showTab('tab1');
-    </script>
+        // Remove active class from all menu items
+        document.querySelectorAll('.menu').forEach(menu => {
+            menu.classList.remove('active');
+        });
+        
+        // Show selected card
+        document.getElementById(tab).classList.add('active');
+        element.classList.add('active');
+        
+        // Load data if needed
+        if (tab === 'brands') loadBrands();
+        if (tab === 'catalogues') loadCatalogues();
+        if (tab === 'variants') loadVariants();
+    }
+
+    // LOGOUT
+    function logout() {
+        localStorage.removeItem("auth");
+        window.location.href = "login.html";
+    }
+
+    // GENERATE IDs
+    function genBrandID() {
+        return "BR" + Date.now();
+    }
+
+    function genCatID() {
+        return "CAT" + Date.now();
+    }
+
+    function genVarID() {
+        return "VAR" + Date.now();
+    }
+
+    // ADD BRAND
+    function addBrand() {
+        const brandName = document.getElementById("brandName").value;
+        const logoURL = document.getElementById("logoURL").value;
+
+        if (!brandName || !logoURL) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        const data = {
+            "Brand ID": genBrandID(),
+            "Brand Name": brandName,
+            "Logo URL": logoURL
+        };
+
+        fetch(API + "?sheet=Brand", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: [data] })
+        }).then(res => {
+            if (res.ok) {
+                alert("Brand Added Successfully!");
+                document.getElementById("brandName").value = "";
+                document.getElementById("logoURL").value = "";
+                loadBrands();
+            }
+        }).catch(err => alert("Error: " + err));
+    }
+
+    // ADD CATALOGUE
+    function addCatalogue() {
+        const catName = document.getElementById("catName").value;
+        const catBrand = document.getElementById("catBrand").value;
+        const catCategory = document.getElementById("catCategory").value;
+
+        if (!catName || !catBrand || !catCategory) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        const id = genCatID();
+        const data = {
+            CatalogueID: id,
+            BrandID: catBrand,
+            CategoryCode: catCategory,
+            CatalogueName: catName,
+            Status: "Active",
+            URL: `https://shobhrajandsons.github.io/Pricelist/?catalogue=${id}`
+        };
+
+        fetch(API + "?sheet=Catalogues", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: [data] })
+        }).then(res => {
+            if (res.ok) {
+                alert("Catalogue Added Successfully!");
+                document.getElementById("catName").value = "";
+                document.getElementById("catBrand").value = "";
+                document.getElementById("catCategory").value = "";
+                loadCatalogues();
+            }
+        }).catch(err => alert("Error: " + err));
+    }
+
+    // ADD VARIANT
+    function addVariant() {
+        const vName = document.getElementById("vName").value;
+        const vCat = document.getElementById("vCat").value;
+        const vHSN = document.getElementById("vHSN").value;
+        const vGST = document.getElementById("vGST").value;
+        const vRRP = document.getElementById("vRRP").value;
+
+        if (!vName || !vCat || !vHSN || !vGST || !vRRP) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        const data = {
+            VariantID: genVarID(),
+            CatalogueID: vCat,
+            VariantName: vName,
+            HSN: vHSN,
+            GST: vGST,
+            RRP: vRRP
+        };
+
+        fetch(API + "?sheet=Variants", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: [data] })
+        }).then(res => {
+            if (res.ok) {
+                alert("Variant Added Successfully!");
+                document.getElementById("vName").value = "";
+                document.getElementById("vCat").value = "";
+                document.getElementById("vHSN").value = "";
+                document.getElementById("vGST").value = "";
+                document.getElementById("vRRP").value = "";
+                loadVariants();
+            }
+        }).catch(err => alert("Error: " + err));
+    }
+
+    // LOAD AND DISPLAY DATA
+    function loadBrands() {
+        fetch(API + "?sheet=Brand").then(res => res.json()).then(data => {
+            const tbody = document.querySelector("#brandTable tbody");
+            tbody.innerHTML = "";
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${row["Brand ID"]}</td><td>${row["Brand Name"]}</td><td><img src="${row["Logo URL"]}" width="50"></td>`;
+                tbody.appendChild(tr);
+            });
+        }).catch(err => console.log(err));
+    }
+
+    function loadCatalogues() {
+        fetch(API + "?sheet=Catalogues").then(res => res.json()).then(data => {
+            const tbody = document.querySelector("#catalogueTable tbody");
+            tbody.innerHTML = "";
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${row.CatalogueID}</td><td>${row.CatalogueName}</td><td>${row.BrandID}</td><td>${row.CategoryCode}</td>`;
+                tbody.appendChild(tr);
+            });
+        }).catch(err => console.log(err));
+    }
+
+    function loadVariants() {
+        fetch(API + "?sheet=Variants").then(res => res.json()).then(data => {
+            const tbody = document.querySelector("#variantTable tbody");
+            tbody.innerHTML = "";
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${row.VariantID}</td><td>${row.VariantName}</td><td>${row.CatalogueID}</td><td>${row.HSN}</td><td>${row.GST}</td><td>${row.RRP}</td>`;
+                tbody.appendChild(tr);
+            });
+        }).catch(err => console.log(err));
+    }
+
+    // Load dashboard stats on page load
+    function loadDashboardStats() {
+        fetch(API + "?sheet=Brand").then(res => res.json()).then(data => {
+            document.getElementById("brandCount").textContent = data.length;
+        }).catch(err => console.log(err));
+
+        fetch(API + "?sheet=Catalogues").then(res => res.json()).then(data => {
+            document.getElementById("catalogueCount").textContent = data.length;
+        }).catch(err => console.log(err));
+
+        fetch(API + "?sheet=Variants").then(res => res.json()).then(data => {
+            document.getElementById("variantCount").textContent = data.length;
+        }).catch(err => console.log(err));
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', loadDashboardStats);
+</script>
+
 </body>
 </html>
